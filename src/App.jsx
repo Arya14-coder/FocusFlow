@@ -60,7 +60,7 @@ const AppContent = () => {
     setTimeLeft(nextTime * 60);
     setMode(nextMode);
     setTimerStatus(settings.autoStartBreaks ? 'running' : 'idle');
-  }, [settings, sessionCount, timeLeft, initialTime, addSession, setTimeLeft, setMode, setTimerStatus]);
+  }, [settings, sessionCount, timeLeft, initialTime, addSession, setTimeLeft, setMode, setTimerStatus, activeTaskId, incrementTaskPom]);
 
   const handleRatingCancel = useCallback(() => {
     setIsRatingOpen(false);
@@ -89,7 +89,7 @@ const AppContent = () => {
     setTimeLeft(nextTime * 60);
     setMode(nextMode);
     setTimerStatus('idle');
-  }, [settings, sessionCount, timeLeft, initialTime, addSession, setTimeLeft, setMode, setTimerStatus]);
+  }, [settings, sessionCount, timeLeft, initialTime, addSession, setTimeLeft, setMode, setTimerStatus, activeTaskId, incrementTaskPom]);
 
 
   // Gap 14: Update document title

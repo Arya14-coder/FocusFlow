@@ -41,44 +41,42 @@ const Settings = () => {
     setDraftSettings(settings);
   }, [settings]);
 
-  const hasChanges = JSON.stringify(draftSettings) !== JSON.stringify(settings);
+  // Debounced Autosave
+  useEffect(() => {
+    const hasChanges = JSON.stringify(draftSettings) !== JSON.stringify(settings);
+    if (!hasChanges) return;
+
+    const timer = setTimeout(async () => {
+      setIsSaving(true);
+      try {
+        await setSettings(draftSettings);
+      } finally {
+        setIsSaving(false);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [draftSettings, settings, setSettings]);
 
   const handleUpdate = (key, value) => {
     setDraftSettings(prev => ({ ...prev, [key]: value }));
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      await setSettings(draftSettings);
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   return (
     <div className="flex flex-col gap-8 mt-4 pb-20 relative">
       <div className="bg-white p-8 rounded-[2.5rem] shadow-premium border border-zinc-50 flex flex-col gap-8">
         <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
-          <h3 className="text-xl font-bold font-outfit text-zinc-900">
-            Timer Preferences
-          </h3>
-          {hasChanges && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              onClick={handleSave}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all disabled:opacity-50"
-            >
-              {isSaving ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
-              Save Changes
-            </motion.button>
-          )}
+          <div className="flex items-center gap-3">
+            <h3 className="text-xl font-bold font-outfit text-zinc-900">
+              Timer Preferences
+            </h3>
+            {isSaving && (
+              <div className="flex items-center gap-2 text-zinc-400 text-xs font-medium animate-pulse">
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
+                Saving...
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Time Settings */}
