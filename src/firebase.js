@@ -3,13 +3,13 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAj4QoIFoYD-DqS0cXkhhrgwXrYU3F6R-A",
-  authDomain: "focusflow-16b5a.firebaseapp.com",
-  projectId: "focusflow-16b5a",
-  storageBucket: "focusflow-16b5a.firebasestorage.app",
-  messagingSenderId: "93432495037",
-  appId: "1:93432495037:web:aa23a73607f74d645170d4",
-  measurementId: "G-ME0MSV8P01"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);

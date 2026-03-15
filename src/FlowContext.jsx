@@ -14,6 +14,7 @@ import {
   deleteDoc, 
   query, 
   orderBy, 
+  addDoc,
   limit,
   serverTimestamp 
 } from 'firebase/firestore';
@@ -83,7 +84,7 @@ export const FlowProvider = ({ children }) => {
 
     // Sync Sessions (with limit to prevent unbounded growth)
     const sessionsRef = collection(db, 'users', user.uid, 'sessions');
-    const qSessions = query(sessionsRef, orderBy('timestamp', 'desc'), limit(200));
+    const qSessions = query(sessionsRef, orderBy('timestamp', 'desc'), limit(500));
     const unsubSessions = onSnapshot(qSessions, (snapshot) => {
       setSessions(snapshot.docs.map(doc => {
         const data = doc.data();

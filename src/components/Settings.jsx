@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import React, { useState, useEffect } from 'react';
 import { useFlow } from '../FlowContext';
 import { Save, Bell, Zap, Clock, Target } from 'lucide-react';
@@ -32,17 +33,53 @@ const NumberInput = ({ value, min = 1, max = 120, onChange }) => {
 
 const Settings = () => {
   const { settings, setSettings } = useFlow();
+  const [draftSettings, setDraftSettings] = useState(settings);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Sync draft when actual settings change (e.g. initial load)
+  useEffect(() => {
+    setDraftSettings(settings);
+  }, [settings]);
+
+  const hasChanges = JSON.stringify(draftSettings) !== JSON.stringify(settings);
 
   const handleUpdate = (key, value) => {
-    setSettings({ ...settings, [key]: value });
+    setDraftSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await setSettings(draftSettings);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <div className="flex flex-col gap-8 mt-4 pb-20">
+    <div className="flex flex-col gap-8 mt-4 pb-20 relative">
       <div className="bg-white p-8 rounded-[2.5rem] shadow-premium border border-zinc-50 flex flex-col gap-8">
-        <h3 className="text-xl font-bold font-outfit text-zinc-900 border-b border-zinc-100 pb-4">
-          Timer Preferences
-        </h3>
+        <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+          <h3 className="text-xl font-bold font-outfit text-zinc-900">
+            Timer Preferences
+          </h3>
+          {hasChanges && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all disabled:opacity-50"
+            >
+              {isSaving ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              Save Changes
+            </motion.button>
+          )}
+        </div>
 
         {/* Time Settings */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -51,7 +88,7 @@ const Settings = () => {
               <Clock className="w-4 h-4" /> Focus
             </label>
             <div className="flex items-center gap-3">
-              <NumberInput value={settings.focusTime} min={1} max={120} onChange={(v) => handleUpdate('focusTime', v)} />
+              <NumberInput value={draftSettings.focusTime} min={1} max={120} onChange={(v) => handleUpdate('focusTime', v)} />
               <span className="text-zinc-400 font-medium">min</span>
             </div>
           </div>
@@ -60,7 +97,7 @@ const Settings = () => {
               <Clock className="w-4 h-4" /> Short Break
             </label>
             <div className="flex items-center gap-3">
-              <NumberInput value={settings.shortBreak} min={1} max={60} onChange={(v) => handleUpdate('shortBreak', v)} />
+              <NumberInput value={draftSettings.shortBreak} min={1} max={60} onChange={(v) => handleUpdate('shortBreak', v)} />
               <span className="text-zinc-400 font-medium">min</span>
             </div>
           </div>
@@ -69,7 +106,7 @@ const Settings = () => {
               <Clock className="w-4 h-4" /> Long Break
             </label>
             <div className="flex items-center gap-3">
-              <NumberInput value={settings.longBreak} min={1} max={60} onChange={(v) => handleUpdate('longBreak', v)} />
+              <NumberInput value={draftSettings.longBreak} min={1} max={60} onChange={(v) => handleUpdate('longBreak', v)} />
               <span className="text-zinc-400 font-medium">min</span>
             </div>
           </div>
@@ -89,7 +126,7 @@ const Settings = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-20">
-                <NumberInput value={settings.dailyGoal || 120} min={30} max={480} onChange={(v) => handleUpdate('dailyGoal', v)} />
+                <NumberInput value={draftSettings.dailyGoal || 120} min={30} max={480} onChange={(v) => handleUpdate('dailyGoal', v)} />
               </div>
               <span className="text-zinc-400 font-medium">min</span>
             </div>
@@ -109,13 +146,13 @@ const Settings = () => {
               </div>
             </div>
             <button 
-              onClick={() => handleUpdate('autoStartBreaks', !settings.autoStartBreaks)}
+              onClick={() => handleUpdate('autoStartBreaks', !draftSettings.autoStartBreaks)}
               className={`w-12 h-6 rounded-full relative transition-colors ${
-                settings.autoStartBreaks ? 'bg-primary' : 'bg-zinc-200'
+                draftSettings.autoStartBreaks ? 'bg-primary' : 'bg-zinc-200'
               }`}
             >
               <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
-                settings.autoStartBreaks ? 'right-1' : 'left-1'
+                draftSettings.autoStartBreaks ? 'right-1' : 'left-1'
               }`} />
             </button>
           </div>
@@ -129,13 +166,13 @@ const Settings = () => {
               </div>
             </div>
             <button 
-              onClick={() => handleUpdate('autoStartFocus', !settings.autoStartFocus)}
+              onClick={() => handleUpdate('autoStartFocus', !draftSettings.autoStartFocus)}
               className={`w-12 h-6 rounded-full relative transition-colors ${
-                settings.autoStartFocus ? 'bg-primary' : 'bg-zinc-200'
+                draftSettings.autoStartFocus ? 'bg-primary' : 'bg-zinc-200'
               }`}
             >
               <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
-                settings.autoStartFocus ? 'right-1' : 'left-1'
+                draftSettings.autoStartFocus ? 'right-1' : 'left-1'
               }`} />
             </button>
           </div>
@@ -150,7 +187,7 @@ const Settings = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-20">
-                <NumberInput value={settings.longBreakInterval || 4} min={1} max={12} onChange={(v) => handleUpdate('longBreakInterval', v)} />
+                <NumberInput value={draftSettings.longBreakInterval || 4} min={1} max={12} onChange={(v) => handleUpdate('longBreakInterval', v)} />
               </div>
               <span className="text-zinc-400 font-medium">poms</span>
             </div>

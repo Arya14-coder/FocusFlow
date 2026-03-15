@@ -23,7 +23,9 @@ const AppContent = () => {
     timeLeft, 
     setTimeLeft,
     initialTime,
-    sessionCount 
+    sessionCount,
+    activeTaskId,
+    incrementTaskPom
   } = useFlow();
 
   const handleSessionEnd = useCallback(() => {
@@ -44,6 +46,10 @@ const AppContent = () => {
       efficiency: ratingData.rating,
       notes: ratingData.notes,
     });
+
+    if (activeTaskId) {
+      incrementTaskPom(activeTaskId);
+    }
 
     setIsRatingOpen(false);
 
@@ -71,6 +77,10 @@ const AppContent = () => {
       efficiency: 5,
       notes: 'No rating provided',
     });
+
+    if (activeTaskId) {
+      incrementTaskPom(activeTaskId);
+    }
 
     const isLongBreak = (sessionCount + 1) % (settings.longBreakInterval || 4) === 0;
     const nextMode = isLongBreak ? 'long-break' : 'short-break';
