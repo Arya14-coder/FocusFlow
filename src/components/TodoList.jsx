@@ -62,6 +62,7 @@ const AutoTextarea = ({ value, onChange, placeholder, className = '' }) => {
 
 // ─── Task Card ────────────────────────────────────────────────────────
 const TaskCard = ({ task, onToggle, onDelete, onUpdate }) => {
+  const { activeTaskId, setActiveTaskId } = useFlow();
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
@@ -147,9 +148,24 @@ const TaskCard = ({ task, onToggle, onDelete, onUpdate }) => {
             )}
           </div>
         </div>
-
         {/* Actions */}
         <div className="flex items-center gap-1 shrink-0">
+          {!task.completed && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveTaskId(activeTaskId === task.id ? null : task.id);
+              }}
+              className={`p-2 rounded-xl transition-all ${
+                activeTaskId === task.id
+                  ? 'text-primary bg-primary/10'
+                  : 'text-zinc-300 hover:text-primary hover:bg-primary/5'
+              }`}
+              title="Set as active task"
+            >
+              <Target className="w-4 h-4" />
+            </button>
+          )}
           {!task.completed && (
             <button
               onClick={(e) => { e.stopPropagation(); setEditing(!editing); setExpanded(true); }}
