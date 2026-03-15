@@ -539,10 +539,12 @@ const Dashboard = () => {
                           {session.type === 'focus' ? <Zap className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                         </div>
                         <div>
-                          <p className="font-bold text-sm text-zinc-800 capitalize">{session.type} Session</p>
+                          <p className="font-bold text-sm text-zinc-800 capitalize">
+                            {linkedTask ? linkedTask.text : `${session.type} Session`}
+                          </p>
                           <p className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
                             {Math.round(session.duration / 60)}m
-                            {linkedTask && <span className="text-primary">• {linkedTask.text?.substring(0, 24)}{linkedTask.text?.length > 24 ? '…' : ''}</span>}
+                            {linkedTask && <span className="text-primary capitalize">• {session.type} Session</span>}
                           </p>
                         </div>
                       </div>

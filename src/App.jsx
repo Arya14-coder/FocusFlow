@@ -29,10 +29,21 @@ const AppContent = () => {
   } = useFlow();
 
   const handleSessionEnd = useCallback(() => {
+    // Record the break session that just ended
+    addSession({
+      type: mode, // will be 'short-break' or 'long-break'
+      duration:
+        timeLeft === 0
+          ? (initialTime || (mode === 'short-break' ? settings.shortBreak : settings.longBreak) * 60)
+          : Math.max(initialTime - timeLeft, 1),
+      efficiency: 10, // Default efficiency for breaks
+      notes: 'Break completed',
+    });
+
     setTimeLeft(settings.focusTime * 60);
     setMode('focus');
     setTimerStatus(settings.autoStartFocus ? 'running' : 'idle');
-  }, [settings, setTimeLeft, setMode, setTimerStatus]);
+  }, [settings, mode, timeLeft, initialTime, addSession, setTimeLeft, setMode, setTimerStatus]);
 
   const handleRatingSave = useCallback((ratingData) => {
     const timeSpentSeconds =
