@@ -183,7 +183,13 @@ export const FlowProvider = ({ children }) => {
     try {
       const taskRef = doc(db, 'users', user.uid, 'tasks', id);
       const task = tasks.find(t => t.id === id);
-      await updateDoc(taskRef, { completed: !task.completed });
+      const isCompleting = !task.completed;
+      
+      if (isCompleting && activeTaskId === id) {
+        setActiveTaskId(null);
+      }
+      
+      await updateDoc(taskRef, { completed: isCompleting });
     } catch (err) {
       console.error('Error toggling task:', err);
     }
