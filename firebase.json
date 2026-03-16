@@ -18,5 +18,13 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "FocusFlow",
+        "supportEmail": "arya14.doshi@gmail.com"
+      }
+    }
   }
 }
