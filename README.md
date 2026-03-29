@@ -1,6 +1,6 @@
 # 🌊 FocusFlow
 
-![FocusFlow Hero Mockup](file:///E:/Projects/Projects/FocusFlow/public/image.png)
+![FocusFlow Website](https://focus-flow-pi-three.vercel.app/)
 
 **FocusFlow** is a premium, high-performance focus and productivity application designed to help you reclaim your flow state. Built with **React 19**, **Vite**, and **Firebase**, it combines a sophisticated Pomodoro-inspired timer with robust task management and deep analytics.
 
