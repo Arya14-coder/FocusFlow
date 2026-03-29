@@ -48,12 +48,50 @@ export const FlowProvider = ({ children }) => {
   const [activeTaskId, setActiveTaskId] = useState(null);
   const [initialTime, setInitialTime] = useState(0);
 
-  // Derive sessionCount: focus sessions since the most recent long break
+  // Initialize or retrieve a tab-specific session ID
+  const tabSessionId = useMemo(() => {
+    let id = sessionStorage.getItem('focus_flow_tab_id');
+    if (!id) {
+      id = Math.random().toString(36).substring(2, 15);
+      sessionStorage.setItem('focus_flow_tab_id', id);
+    }
+    return id;
+  }, []);
+
+  // Derive sessionCount: focus sessions in the current "sitting" (this tab + <1h gap)
   const sessionCount = useMemo(() => {
-    const lastLongBreakIdx = sessions.findIndex(s => s.type === 'long-break');
-    const relevant = lastLongBreakIdx === -1 ? sessions : sessions.slice(0, lastLongBreakIdx);
-    return relevant.filter(s => s.type === 'focus').length;
-  }, [sessions]);
+    // 1. Only consider sessions from THIS tab session
+    const sessionsThisTab = sessions.filter(s => s.tabSessionId === tabSessionId);
+    
+    // 2. Find the most recent long break IN THIS TAB
+    const lastLongBreakIdx = sessionsThisTab.findIndex(s => s.type === 'long-break');
+    const sinceLongBreak = lastLongBreakIdx === -1 ? sessionsThisTab : sessionsThisTab.slice(0, lastLongBreakIdx);
+    
+    if (sinceLongBreak.length === 0) return 0;
+
+    const GAP_THRESHOLD = 60 * 60 * 1000; // 1 hour
+    let sittingFocusCount = 0;
+
+    for (let i = 0; i < sinceLongBreak.length; i++) {
+      const current = sinceLongBreak[i];
+      const nextInPast = sinceLongBreak[i + 1];
+
+      if (current.type === 'focus') {
+        sittingFocusCount++;
+      }
+
+      // Check gap with the PREVIOUS session in time (the next one in the array which is ordered desc)
+      if (nextInPast) {
+        const currentTime = new Date(current.timestamp).getTime();
+        const nextTime = new Date(nextInPast.timestamp).getTime();
+        if (currentTime - nextTime > GAP_THRESHOLD) {
+          break; // Gap too large, end of "sitting"
+        }
+      }
+    }
+
+    return sittingFocusCount;
+  }, [sessions, tabSessionId]);
 
 
   // Auth Listener
@@ -145,7 +183,15 @@ export const FlowProvider = ({ children }) => {
   }, [timerStatus, timeLeft]);
 
   // Auth Actions
-  const login = () => signInWithPopup(auth, googleProvider);
+  const login = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+      console.error('Firebase Authentication Error:', err.code, err.message);
+      // You could also set an error state here to show in the UI if desired
+      throw err;
+    }
+  };
   const logout = () => signOut(auth);
 
   // Task Actions
@@ -230,6 +276,7 @@ export const FlowProvider = ({ children }) => {
       await addDoc(sessionsRef, {
         ...sessionData,
         taskId: activeTaskId,
+        tabSessionId, // Track which tab this belongs to
         timestamp: serverTimestamp(),
       });
     } catch (err) {
